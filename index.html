@@ -4,6 +4,8 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>全国过敏风险地图</title>
+  <!-- Leaflet CSS -->
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
   <style>
     *{margin:0;padding:0;box-sizing:border-box}
     body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Hiragino Sans GB","Microsoft YaHei",sans-serif;background:linear-gradient(135deg,#1a1a2e 0%,#16213e 50%,#0f3460 100%);min-height:100vh;color:#fff}
@@ -14,11 +16,9 @@
     .month-btn{padding:10px 20px;border:2px solid #4a9eff;background:transparent;color:#4a9eff;border-radius:25px;cursor:pointer;font-size:14px;transition:all .3s}
     .month-btn:hover,.month-btn.active{background:#4a9eff;color:#fff}
     .container{display:flex;flex-wrap:wrap;justify-content:center;gap:30px;padding:20px;max-width:1400px;margin:0 auto}
-    .map-section{flex:1;min-width:500px;max-width:800px}
-    .china-map{background:rgba(255,255,255,0.05);border-radius:20px;padding:20px}
-    .china-map svg{width:100%;height:auto}
-    .city-dot{cursor:pointer;transition:all .3s}
-    .city-dot:hover{transform:scale(1.3)}
+    .map-section{flex:1;min-width:500px;max-width:900px}
+    .china-map{background:rgba(255,255,255,0.05);border-radius:20px;padding:10px;height:500px}
+    #map{width:100%;height:100%;border-radius:15px}
     .info-section{flex:0 0 350px}
     .legend{background:rgba(255,255,255,0.08);border-radius:15px;padding:20px;margin-bottom:20px}
     .legend h3{margin-bottom:15px;font-size:16px}
@@ -58,7 +58,9 @@
     .footer{text-align:center;padding:30px;color:#666;font-size:12px}
     .high-risk-cities{margin-top:15px;background:rgba(255,71,87,0.15);border-radius:10px;padding:15px;border-left:3px solid #ff4757}
     .high-risk-cities h4{font-size:14px;color:#ff4757;margin-bottom:8px}
-    @media(max-width:768px){.container{flex-direction:column;align-items:center}.map-section{min-width:100%}.info-section{flex:0 0 100%;width:100%}}
+    /* Leaflet marker styles */
+    .city-marker{background:#fff;border-radius:50%;border:3px solid #fff;box-shadow:0 2px 10px rgba(0,0,0,0.3)}
+    @media(max-width:768px){.container{flex-direction:column;align-items:center}.map-section{min-width:100%}.info-section{flex:0 0 100%;width:100%}.china-map{height:400px}}
   </style>
 </head>
 <body>
@@ -70,50 +72,7 @@
   <div class="container">
     <div class="map-section">
       <div class="china-map">
-        <svg viewBox="0 0 600 550" id="china-svg">
-          <g fill="#3a5a8c" stroke="#5a8abe" stroke-width="0.5">
-            <path d="M420,180 L450,160 L480,170 L510,150 L530,170 L540,200 L520,230 L490,240 L460,260 L430,250 L410,220 L400,190 Z"/>
-            <path d="M380,200 L410,190 L430,220 L440,250 L420,280 L380,290 L350,270 L340,230 L360,200 Z"/>
-            <path d="M350,230 L380,220 L400,250 L410,280 L390,310 L350,320 L320,300 L310,260 Z"/>
-            <path d="M360,290 L390,280 L420,300 L430,330 L410,360 L370,370 L340,350 L350,310 Z"/>
-            <path d="M320,300 L350,290 L360,320 L350,360 L320,380 L290,360 L280,320 Z"/>
-            <path d="M480,220 L510,210 L530,240 L540,280 L520,310 L490,320 L460,300 L470,260 Z"/>
-            <path d="M490,260 L520,250 L540,280 L550,320 L530,350 L500,360 L470,340 L460,300 Z"/>
-            <path d="M530,320 L560,300 L580,330 L570,370 L540,390 L510,380 L520,350 Z"/>
-            <path d="M450,340 L480,330 L510,350 L520,380 L500,410 L460,420 L440,390 L440,360 Z"/>
-            <path d="M500,380 L530,370 L560,390 L550,430 L520,450 L490,440 L490,410 Z"/>
-            <path d="M400,360 L440,350 L460,380 L450,420 L420,440 L390,420 L390,380 Z"/>
-            <path d="M370,380 L400,370 L420,400 L410,440 L380,460 L350,440 L350,400 Z"/>
-            <path d="M330,400 L360,390 L380,420 L370,460 L340,480 L310,460 L310,420 Z"/>
-            <path d="M460,450 L490,440 L520,460 L510,500 L470,520 L440,500 L450,470 Z"/>
-            <path d="M420,470 L450,460 L480,480 L470,520 L440,540 L410,520 L410,490 Z"/>
-            <path d="M380,480 L410,470 L440,490 L430,530 L400,550 L370,530 L370,500 Z"/>
-            <path d="M280,420 L320,400 L350,430 L340,480 L300,510 L270,490 L260,450 Z"/>
-            <path d="M340,500 L370,490 L400,520 L380,560 L340,570 L310,550 Z"/>
-            <path d="M240,360 L280,340 L310,370 L300,420 L260,450 L230,420 L220,380 Z"/>
-            <path d="M180,320 L230,300 L260,340 L250,390 L210,420 L170,390 L160,350 Z"/>
-            <path d="M260,300 L300,280 L330,310 L320,360 L280,390 L250,360 L240,320 Z"/>
-            <path d="M100,300 L150,280 L190,310 L180,360 L140,390 L100,360 L90,320 Z"/>
-            <path d="M80,380 L120,360 L150,390 L140,430 L100,460 L60,430 L60,400 Z"/>
-            <path d="M460,180 L490,170 L510,190 L500,220 L470,230 L450,210 Z"/>
-            <path d="M410,220 L450,210 L470,240 L460,280 L420,290 L400,260 Z"/>
-            <path d="M380,160 L420,150 L450,170 L440,200 L400,210 L370,190 Z"/>
-            <path d="M350,170 L380,160 L400,190 L390,220 L360,230 L340,200 Z"/>
-            <path d="M540,180 L570,170 L590,200 L580,240 L550,260 L520,240 L530,200 Z"/>
-            <path d="M480,120 L520,100 L560,120 L570,160 L540,180 L500,170 L480,150 Z"/>
-            <path d="M520,60 L570,50 L610,80 L620,130 L580,160 L530,150 L510,110 Z"/>
-            <path d="M560,20 L600,10 L640,40 L640,90 L600,120 L560,100 L550,50 Z"/>
-            <path d="M580,0 L630,0 L670,40 L660,100 L620,130 L580,100 L570,40 Z"/>
-            <path d="M400,80 L450,60 L490,80 L500,120 L460,150 L410,140 L390,100 Z"/>
-            <path d="M320,80 L380,60 L420,80 L430,120 L390,150 L340,150 L300,120 Z"/>
-            <path d="M240,60 L310,40 L360,60 L370,100 L320,130 L260,120 L230,80 Z"/>
-            <path d="M140,100 L210,70 L270,90 L270,140 L220,170 L160,150 L130,120 Z"/>
-            <path d="M60,120 L130,90 L180,110 L180,160 L130,190 L70,170 L50,140 Z"/>
-            <path d="M50,240 L100,220 L150,250 L140,310 L90,340 L40,310 L30,270 Z"/>
-            <path d="M90,320 L140,300 L180,340 L160,400 L110,430 L60,400 L50,350 Z"/>
-          </g>
-          <g id="city-dots"></g>
-        </svg>
+        <div id="map"></div>
       </div>
     </div>
     <div class="info-section">
@@ -156,58 +115,276 @@
     <p>数据来源：基于气象监测和医学研究数据 | 更新时间：每日</p>
     <p style="margin-top:5px">⚠️ 仅供参考，具体过敏情况因人而异</p>
   </div>
+
+  <!-- Leaflet JS -->
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-const cityData={
-北京:{x:430,y:195,allergens:{spring:["杨树/柳树花粉","柏树花粉","梧桐花粉"],summer:["葎草花粉","玉米花粉"],fall:["蒿草花粉","豚草花粉"],winter:["室内尘螨","霉菌"]},riskPattern:{spring:"very-high",summer:"medium",fall:"high",winter:"low"},tips:"春秋季花粉浓度极高，建议外出佩戴N95口罩，避免晨起和傍晚户外活动。"},
-上海:{x:510,y:280,allergens:{spring:["柏树花粉","杨树花粉"],summer:["霉菌","蟑螂抗原"],fall:["霉菌","螨虫"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"low",winter:"low"},tips:"春季梧桐飞絮较多，注意防护。夏季霉菌过敏高发，保持家居干燥。"},
-广州:{x:450,y:500,allergens:{spring:["螨虫","蟑螂抗原"],summer:["霉菌","螨虫"],fall:["螨虫","草本花粉"],winter:["螨虫","草本花粉"]},riskPattern:{spring:"medium",summer:"medium",fall:"medium",winter:"low"},tips:"广州全年螨虫过敏风险较高，定期除螨、保持室内清洁很重要。"},
-深圳:{x:460,y:530,allergens:{spring:["螨虫","霉菌"],summer:["霉菌","蟑螂"],fall:["螨虫","花粉"],winter:["螨虫"]},riskPattern:{spring:"medium",summer:"medium",fall:"low",winter:"low"},tips:"全年湿度大，霉菌和螨虫是主要过敏原。建议使用除湿机。"},
-成都:{x:280,y:380,allergens:{spring:["柏树花粉","杨树花粉","银杏花粉"],summer:["霉菌","蟑螂"],fall:["霉菌","螨虫"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"low",winter:"low"},tips:"春季柏树花粉较多。四川盆地湿度大，霉菌过敏需注意。"},
-重庆:{x:260,y:410,allergens:{spring:["柏树","杨树"],summer:["霉菌（高湿）"],fall:["螨虫","霉菌"],winter:["螨虫"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"山城湿度大，霉菌是主要过敏原。春季柏树花粉需注意。"},
-杭州:{x:500,y:330,allergens:{spring:["柏树","杨树","法国梧桐"],summer:["蝉翼","霉菌"],fall:["葎草","霉菌"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"春季梧桐絮飞扬，敏感人群避免在梧桐树下久留。"},
-南京:{x:495,y:290,allergens:{spring:["柏树","杨树","法国梧桐"],summer:["霉菌"],fall:["葎草","霉菌"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"南京梧桐树多，春季飞絮季节注意防护。"},
-武汉:{x:400,y:380,allergens:{spring:["柏树","杨树","法国梧桐"],summer:["霉菌","蝉翼"],fall:["葎草","霉菌"],winter:["螨虫"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"春季法国梧桐花粉是主要过敏原，秋季葎草需注意。"},
-西安:{x:380,y:250,allergens:{spring:["柏树","杨树","沙枣花粉"],summer:["玉米花粉","向日葵"],fall:["蒿草","葎草"],winter:["室内尘螨","霉菌"]},riskPattern:{spring:"high",summer:"medium",fall:"high",winter:"low"},tips:"春秋两季都是高风险期，花粉种类多，需全年防护。"},
-天津:{x:440,y:200,allergens:{spring:["杨树/柳树","柏树","梧桐"],summer:["葎草","霉菌"],fall:["蒿草","霉菌"],winter:["室内尘螨"]},riskPattern:{spring:"very-high",summer:"medium",fall:"high",winter:"low"},tips:"春季杨柳絮极其严重，建议高敏感人群外出必戴口罩。"},
-郑州:{x:420,y:260,allergens:{spring:["杨树","柳树","柏树","梧桐"],summer:["葎草","玉米"],fall:["蒿草","葎草"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"high",winter:"low"},tips:"郑州春季花粉浓度高，秋季蒿草花粉也需注意。"},
-济南:{x:435,y:225,allergens:{spring:["杨树","柳树","柏树"],summer:["葎草","玉米"],fall:["蒿草","葎草"],winter:["室内尘螨"]},riskPattern:{spring:"very-high",summer:"medium",fall:"high",winter:"low"},tips:"济南春季杨柳絮严重，是北方过敏重灾区之一。"},
-沈阳:{x:545,y:120,allergens:{spring:["柏树","杨树","桦树"],summer:["草本花粉","霉菌"],fall:["霉菌","杂草花粉"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"东北地区春季来得晚，花粉季相应延迟，但强度不小。"},
-哈尔滨:{x:590,y:60,allergens:{spring:["桦树","赤杨","柏树"],summer:["草本花粉（黑麦草）"],fall:["霉菌","杂草"],winter:["室内尘螨","宠物皮屑"]},riskPattern:{spring:"high",summer:"high",fall:"medium",winter:"low"},tips:"哈尔滨纬度最高，夏季草本花粉浓度极高，需特别注意。"},
-昆明:{x:230,y:460,allergens:{spring:["螨虫","霉菌"],summer:["霉菌","蟑螂"],fall:["螨虫","草本花粉"],winter:["螨虫","霉菌"]},riskPattern:{spring:"low",summer:"medium",fall:"low",winter:"low"},tips:"昆明四季如春，花粉风险较低，但螨虫全年可致敏。"},
-乌鲁木齐:{x:90,y:150,allergens:{spring:["杨树","柳树","榆树"],summer:["草本花粉","向日葵"],fall:["霉菌","杂草"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"high",fall:"medium",winter:"low"},tips:"新疆气候干燥，夏季草本花粉和向日葵花粉危害大。"},
-兰州:{x:290,y:200,allergens:{spring:["杨树","柳树","柏树"],summer:["草本花粉","向日葵"],fall:["蒿草","葎草"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"high",fall:"high",winter:"low"},tips:"兰州春秋都是高风险，全年花粉过敏防护期长。"},
-太原:{x:390,y:210,allergens:{spring:["杨树","柳树","柏树"],summer:["葎草","草本"],fall:["蒿草","葎草"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"high",winter:"low"},tips:"太原春秋花粉种类多，防护时间较长。"},
-石家庄:{x:420,y:220,allergens:{spring:["杨树","柳树","柏树"],summer:["葎草","玉米"],fall:["蒿草","葎草"],winter:["室内尘螨"]},riskPattern:{spring:"very-high",summer:"medium",fall:"high",winter:"low"},tips:"河北平原是花粉重灾区，春季风险极高，建议减少外出。"},
-合肥:{x:465,y:320,allergens:{spring:["柏树","杨树","法国梧桐"],summer:["霉菌","蝉翼"],fall:["葎草","霉菌"],winter:["螨虫"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"春季梧桐絮需注意防护，夏季注意防霉。"},
-南昌:{x:430,y:400,allergens:{spring:["柏树","杨树","法国梧桐"],summer:["霉菌","蝉翼"],fall:["葎草","霉菌"],winter:["螨虫"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"南昌春季梧桐花粉较多，秋季葎草需注意。"},
-长沙:{x:385,y:430,allergens:{spring:["柏树","杨树","法国梧桐"],summer:["霉菌","蝉翼"],fall:["葎草","霉菌"],winter:["螨虫","蟑螂"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"长沙湿度大，霉菌过敏全年都可能发生。"},
-福州:{x:490,y:430,allergens:{spring:["螨虫","霉菌","蟑螂"],summer:["霉菌","蝉翼"],fall:["螨虫","花粉"],winter:["螨虫"]},riskPattern:{spring:"medium",summer:"medium",fall:"low",winter:"low"},tips:"沿海城市湿度大，螨虫和霉菌是主要过敏原。"},
-厦门:{x:485,y:475,allergens:{spring:["螨虫","霉菌"],summer:["螨虫","霉菌"],fall:["螨虫","花粉"],winter:["螨虫"]},riskPattern:{spring:"medium",summer:"medium",fall:"low",winter:"low"},tips:"海岛城市全年潮湿，螨虫和霉菌高发。"},
-大连:{x:500,y:145,allergens:{spring:["柏树","杨树","法国梧桐"],summer:["霉菌（海雾）"],fall:["葎草","霉菌"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"沿海城市夏季海雾导致霉菌孢子浓度升高。"},
-长春:{x:580,y:80,allergens:{spring:["桦树","赤杨","柏树"],summer:["草本花粉","霉菌"],fall:["霉菌","杂草"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"high",fall:"medium",winter:"low"},tips:"东北夏季草本花粉强度大，黑麦草花粉浓度高。"},
-青岛:{x:465,y:220,allergens:{spring:["柏树","杨树","法国梧桐"],summer:["霉菌（海雾）"],fall:["葎草","霉菌"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"海滨城市湿度大，霉菌过敏需常年注意。"},
-呼和浩特:{x:380,y:150,allergens:{spring:["杨树","柳树","柏树","桦树"],summer:["草本花粉","霉菌"],fall:["霉菌","杂草"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"内蒙古草原地区夏季草本花粉强度大，需注意。"},
-苏州:{x:505,y:310,allergens:{spring:["柏树","杨树","法国梧桐"],summer:["霉菌（梅雨）"],fall:["霉菌","螨虫"],winter:["螨虫"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"苏州梅雨季（6-7月）霉菌孢子浓度极高。"},
-贵阳:{x:200,y:420,allergens:{spring:["柏树","杨树","霉菌"],summer:["霉菌（高湿）"],fall:["霉菌","螨虫"],winter:["螨虫"]},riskPattern:{spring:"medium",summer:"medium",fall:"medium",winter:"low"},tips:"贵阳"天无三日晴"，霉菌全年都可能致敏。"},
-南宁:{x:365,y:505,allergens:{spring:["螨虫","霉菌"],summer:["霉菌","蟑螂"],fall:["螨虫","花粉"],winter:["螨虫"]},riskPattern:{spring:"medium",summer:"medium",fall:"low",winter:"low"},tips:"南国城市螨虫和霉菌是主要过敏原，终年需防护。"},
-海口:{x:400,y:555,allergens:{spring:["螨虫","霉菌"],summer:["霉菌","蟑螂"],fall:["螨虫","花粉"],winter:["螨虫"]},riskPattern:{spring:"medium",summer:"medium",fall:"low",winter:"low"},tips:"热带城市全年湿热，室内过敏原更需关注。"},
-拉萨:{x:150,y:350,allergens:{spring:["杨树","柳树","沙棘"],summer:["草本花粉","霉菌"],fall:["霉菌","杂草"],winter:["室内尘螨"]},riskPattern:{spring:"medium",summer:"medium",fall:"low",winter:"low"},tips:"高原地区氧气稀薄，过敏症状可能更明显。"}
+    // 城市真实经纬度坐标
+    const cityCoords = {
+      北京: [39.9042, 116.4074],
+      上海: [31.2304, 121.4737],
+      广州: [23.1291, 113.2644],
+      深圳: [22.5431, 114.0579],
+      成都: [30.5728, 104.0668],
+      重庆: [29.4316, 106.9123],
+      杭州: [30.2741, 120.1551],
+      南京: [32.0603, 118.7969],
+      武汉: [30.5928, 114.3055],
+      西安: [34.3416, 108.9398],
+      天津: [39.3434, 117.3616],
+      郑州: [34.7466, 113.6253],
+      济南: [36.6512, 117.1201],
+      沈阳: [41.8057, 123.4328],
+      哈尔滨: [45.8038, 126.5340],
+      昆明: [25.0406, 102.7129],
+      乌鲁木齐: [43.8256, 87.6168],
+      兰州: [36.0611, 103.8343],
+      太原: [37.8706, 112.5489],
+      石家庄: [38.0428, 114.5149],
+      合肥: [31.8206, 117.2272],
+      南昌: [28.6820, 115.8579],
+      长沙: [28.2282, 112.9388],
+      福州: [26.0745, 119.2965],
+      厦门: [24.4798, 118.0894],
+      大连: [38.9140, 121.6147],
+      长春: [43.8171, 125.3235],
+      青岛: [36.0671, 120.3826],
+      呼和浩特: [40.8414, 111.7519],
+      苏州: [31.2989, 120.5853],
+      贵阳: [26.6470, 106.6302],
+      南宁: [22.8170, 108.3665],
+      海口: [20.0444, 110.1999],
+      拉萨: [29.6500, 91.1000]
+    };
+
+    const cityData={
+北京:{allergens:{spring:["杨树/柳树花粉","柏树花粉","梧桐花粉"],summer:["葎草花粉","玉米花粉"],fall:["蒿草花粉","豚草花粉"],winter:["室内尘螨","霉菌"]},riskPattern:{spring:"very-high",summer:"medium",fall:"high",winter:"low"},tips:"春秋季花粉浓度极高，建议外出佩戴N95口罩，避免晨起和傍晚户外活动。"},
+上海:{allergens:{spring:["柏树花粉","杨树花粉"],summer:["霉菌","蟑螂抗原"],fall:["霉菌","螨虫"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"low",winter:"low"},tips:"春季梧桐飞絮较多，注意防护。夏季霉菌过敏高发，保持家居干燥。"},
+广州:{allergens:{spring:["螨虫","蟑螂抗原"],summer:["霉菌","螨虫"],fall:["螨虫","草本花粉"],winter:["螨虫","草本花粉"]},riskPattern:{spring:"medium",summer:"medium",fall:"medium",winter:"low"},tips:"广州全年螨虫过敏风险较高，定期除螨、保持室内清洁很重要。"},
+深圳:{allergens:{spring:["螨虫","霉菌"],summer:["霉菌","蟑螂"],fall:["螨虫","花粉"],winter:["螨虫"]},riskPattern:{spring:"medium",summer:"medium",fall:"low",winter:"low"},tips:"全年湿度大，霉菌和螨虫是主要过敏原。建议使用除湿机。"},
+成都:{allergens:{spring:["柏树花粉","杨树花粉","银杏花粉"],summer:["霉菌","蟑螂"],fall:["霉菌","螨虫"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"low",winter:"low"},tips:"春季柏树花粉较多。四川盆地湿度大，霉菌过敏需注意。"},
+重庆:{allergens:{spring:["柏树","杨树"],summer:["霉菌（高湿）"],fall:["螨虫","霉菌"],winter:["螨虫"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"山城湿度大，霉菌是主要过敏原。春季柏树花粉需注意。"},
+杭州:{allergens:{spring:["柏树","杨树","法国梧桐"],summer:["蝉翼","霉菌"],fall:["葎草","霉菌"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"春季梧桐絮飞扬，敏感人群避免在梧桐树下久留。"},
+南京:{allergens:{spring:["柏树","杨树","法国梧桐"],summer:["霉菌"],fall:["葎草","霉菌"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"南京梧桐树多，春季飞絮季节注意防护。"},
+武汉:{allergens:{spring:["柏树","杨树","法国梧桐"],summer:["霉菌","蝉翼"],fall:["葎草","霉菌"],winter:["螨虫"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"春季法国梧桐花粉是主要过敏原，秋季葎草需注意。"},
+西安:{allergens:{spring:["柏树","杨树","沙枣花粉"],summer:["玉米花粉","向日葵"],fall:["蒿草","葎草"],winter:["室内尘螨","霉菌"]},riskPattern:{spring:"high",summer:"medium",fall:"high",winter:"low"},tips:"春秋两季都是高风险期，花粉种类多，需全年防护。"},
+天津:{allergens:{spring:["杨树/柳树","柏树","梧桐"],summer:["葎草","霉菌"],fall:["蒿草","霉菌"],winter:["室内尘螨"]},riskPattern:{spring:"very-high",summer:"medium",fall:"high",winter:"low"},tips:"春季杨柳絮极其严重，建议高敏感人群外出必戴口罩。"},
+郑州:{allergens:{spring:["杨树","柳树","柏树","梧桐"],summer:["葎草","玉米"],fall:["蒿草","葎草"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"high",winter:"low"},tips:"郑州春季花粉浓度高，秋季蒿草花粉也需注意。"},
+济南:{allergens:{spring:["杨树","柳树","柏树"],summer:["葎草","玉米"],fall:["蒿草","葎草"],winter:["室内尘螨"]},riskPattern:{spring:"very-high",summer:"medium",fall:"high",winter:"low"},tips:"济南春季杨柳絮严重，是北方过敏重灾区之一。"},
+沈阳:{allergens:{spring:["柏树","杨树","桦树"],summer:["草本花粉","霉菌"],fall:["霉菌","杂草花粉"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"东北地区春季来得晚，花粉季相应延迟，但强度不小。"},
+哈尔滨:{allergens:{spring:["桦树","赤杨","柏树"],summer:["草本花粉（黑麦草）"],fall:["霉菌","杂草"],winter:["室内尘螨","宠物皮屑"]},riskPattern:{spring:"high",summer:"high",fall:"medium",winter:"low"},tips:"哈尔滨纬度最高，夏季草本花粉浓度极高，需特别注意。"},
+昆明:{allergens:{spring:["螨虫","霉菌"],summer:["霉菌","蟑螂"],fall:["螨虫","草本花粉"],winter:["螨虫","霉菌"]},riskPattern:{spring:"low",summer:"medium",fall:"low",winter:"low"},tips:"昆明四季如春，花粉风险较低，但螨虫全年可致敏。"},
+乌鲁木齐:{allergens:{spring:["杨树","柳树","榆树"],summer:["草本花粉","向日葵"],fall:["霉菌","杂草"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"high",fall:"medium",winter:"low"},tips:"新疆气候干燥，夏季草本花粉和向日葵花粉危害大。"},
+兰州:{allergens:{spring:["杨树","柳树","柏树"],summer:["草本花粉","向日葵"],fall:["蒿草","葎草"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"high",fall:"high",winter:"low"},tips:"兰州春秋都是高风险，全年花粉过敏防护期长。"},
+太原:{allergens:{spring:["杨树","柳树","柏树"],summer:["葎草","草本"],fall:["蒿草","葎草"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"high",winter:"low"},tips:"太原春秋花粉种类多，防护时间较长。"},
+石家庄:{allergens:{spring:["杨树","柳树","柏树"],summer:["葎草","玉米"],fall:["蒿草","葎草"],winter:["室内尘螨"]},riskPattern:{spring:"very-high",summer:"medium",fall:"high",winter:"low"},tips:"河北平原是花粉重灾区，春季风险极高，建议减少外出。"},
+合肥:{allergens:{spring:["柏树","杨树","法国梧桐"],summer:["霉菌","蝉翼"],fall:["葎草","霉菌"],winter:["螨虫"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"春季梧桐絮需注意防护，夏季注意防霉。"},
+南昌:{allergens:{spring:["柏树","杨树","法国梧桐"],summer:["霉菌","蝉翼"],fall:["葎草","霉菌"],winter:["螨虫"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"南昌春季梧桐花粉较多，秋季葎草需注意。"},
+长沙:{allergens:{spring:["柏树","杨树","法国梧桐"],summer:["霉菌","蝉翼"],fall:["葎草","霉菌"],winter:["螨虫","蟑螂"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"长沙湿度大，霉菌过敏全年都可能发生。"},
+福州:{allergens:{spring:["螨虫","霉菌","蟑螂"],summer:["霉菌","蝉翼"],fall:["螨虫","花粉"],winter:["螨虫"]},riskPattern:{spring:"medium",summer:"medium",fall:"low",winter:"low"},tips:"沿海城市湿度大，螨虫和霉菌是主要过敏原。"},
+厦门:{allergens:{spring:["螨虫","霉菌"],summer:["螨虫","霉菌"],fall:["螨虫","花粉"],winter:["螨虫"]},riskPattern:{spring:"medium",summer:"medium",fall:"low",winter:"low"},tips:"海岛城市全年潮湿，螨虫和霉菌高发。"},
+大连:{allergens:{spring:["柏树","杨树","法国梧桐"],summer:["霉菌（海雾）"],fall:["葎草","霉菌"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"沿海城市夏季海雾导致霉菌孢子浓度升高。"},
+长春:{allergens:{spring:["桦树","赤杨","柏树"],summer:["草本花粉","霉菌"],fall:["霉菌","杂草"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"high",fall:"medium",winter:"low"},tips:"东北夏季草本花粉强度大，黑麦草花粉浓度高。"},
+青岛:{allergens:{spring:["柏树","杨树","法国梧桐"],summer:["霉菌（海雾）"],fall:["葎草","霉菌"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"海滨城市湿度大，霉菌过敏需常年注意。"},
+呼和浩特:{allergens:{spring:["杨树","柳树","柏树","桦树"],summer:["草本花粉","霉菌"],fall:["霉菌","杂草"],winter:["室内尘螨"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"内蒙古草原地区夏季草本花粉强度大，需注意。"},
+苏州:{allergens:{spring:["柏树","杨树","法国梧桐"],summer:["霉菌（梅雨）"],fall:["霉菌","螨虫"],winter:["螨虫"]},riskPattern:{spring:"high",summer:"medium",fall:"medium",winter:"low"},tips:"苏州梅雨季（6-7月）霉菌孢子浓度极高。"},
+贵阳:{allergens:{spring:["柏树","杨树","霉菌"],summer:["霉菌（高湿）"],fall:["霉菌","螨虫"],winter:["螨虫"]},riskPattern:{spring:"medium",summer:"medium",fall:"medium",winter:"low"},tips:"贵阳"天无三日晴"，霉菌全年都可能致敏。"},
+南宁:{allergens:{spring:["螨虫","霉菌"],summer:["霉菌","蟑螂"],fall:["螨虫","花粉"],winter:["螨虫"]},riskPattern:{spring:"medium",summer:"medium",fall:"low",winter:"low"},tips:"南国城市螨虫和霉菌是主要过敏原，终年需防护。"},
+海口:{allergens:{spring:["螨虫","霉菌"],summer:["霉菌","蟑螂"],fall:["螨虫","花粉"],winter:["螨虫"]},riskPattern:{spring:"medium",summer:"medium",fall:"low",winter:"low"},tips:"热带城市全年湿热，室内过敏原更需关注。"},
+拉萨:{allergens:{spring:["杨树","柳树","沙棘"],summer:["草本花粉","霉菌"],fall:["霉菌","杂草"],winter:["室内尘螨"]},riskPattern:{spring:"medium",summer:"medium",fall:"low",winter:"low"},tips:"高原地区氧气稀薄，过敏症状可能更明显。"}
 };
-const monthNames=["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
-const pollenCalendar={spring:[{icon:"🌳",name:"杨树/柳树花粉",desc:"华北地区3-4月高峰"},{icon:"🌲",name:"柏树花粉",desc:"3-5月全国分布"},{icon:"🌸",name:"法国梧桐",desc:"长三角4-5月飞絮"},{icon:"🍃",name:"桦树花粉",desc:"东北4-6月高峰"}],summer:[{icon:"🌾",name:"草本花粉",desc:"北方夏季主要过敏原"},{icon:"🌻",name:"向日葵花粉",desc:"西北7-8月"},{icon:"🍂",name:"蝉翼/蝉过敏",desc:"南方夏季特有"}],fall:[{icon:"🌿",name:"蒿草花粉",desc:"北方8-10月高峰"},{icon:"🍁",name:"葎草花粉",desc:"9-10月全国分布"},{icon:"🌾",name:"豚草花粉",desc:"北方城市秋季"},{icon:"🍄",name:"霉菌孢子",desc:"秋季潮湿环境高发"}],winter:[{icon:"🏠",name:"室内尘螨",desc:"冬季门窗紧闭高发"},{icon:"🍄",name:"霉菌",desc:"冬季室内暖气诱发"},{icon:"🐛",name:"宠物皮屑",desc:"冬季室内接触增加"}]};
-function getSeason(m){if(m>=3&&m<=5)return"spring";if(m>=6&&m<=8)return"summer";if(m>=9&&m<=11)return"fall";return"winter"}
-function getRiskText(r){return{low:"低风险",medium:"中风险",high:"高风险","very-high":"极高风险"}[r]}
-function getRiskClass(r){return{low:"risk-low",medium:"risk-medium",high:"risk-high","very-high":"risk-very-high"}[r]}
-function getRiskColor(r){return{low:"#2ed573",medium:"#ffa502",high:"#ff4757","very-high":"#8b0000"}[r]}
-function initMonthControls(){const c=document.getElementById("month-controls");const cm=new Date().getMonth()+1;monthNames.forEach((n,i)=>{const b=document.createElement("button");b.className="month-btn"+(i+1===cm?" active":"");b.textContent=n;b.onclick=()=>{document.querySelectorAll(".month-btn").forEach(x=>x.classList.remove("active"));b.classList.add("active");updateMap(i+1)};c.appendChild(b)})}
-function updateCityDots(m){const s=getSeason(m);const c=document.getElementById("city-dots");c.innerHTML="";Object.entries(cityData).forEach(([n,d])=>{const r=d.riskPattern[s];const color=getRiskColor(r);const circle=document.createElementNS("http://www.w3.org/2000/svg","circle");circle.setAttribute("cx",d.x);circle.setAttribute("cy",d.y);circle.setAttribute("r","8");circle.setAttribute("fill",color);circle.setAttribute("opacity","0.8");circle.setAttribute("class","city-dot");circle.onclick=()=>showCityDetail(n);c.appendChild(circle)})}
-function updateCityList(m){const s=getSeason(m);const c=document.getElementById("city-list-content");const t=document.getElementById("city-list-title");t.textContent=monthNames[m-1]+"全国主要城市过敏风险";const sorted=Object.entries(cityData).map(([n,d])=>({name:n,...d})).sort((a,b)=>{const o={"very-high":0,high:1,medium:2,low:3};return o[a.riskPattern[s]]-o[b.riskPattern[s]]});c.innerHTML=sorted.map(city=>'<div class="city-item" onclick="showCityDetail(\''+city.name+'\')"><div><div class="city-name">'+city.name+'</div><div class="city-allergens">'+city.allergens[s].slice(0,2).join("、")+'</div></div><span class="risk-badge '+getRiskClass(city.riskPattern[s])+'">'+getRiskText(city.riskPattern[s])+"</span></div>").join("")}
-function updatePollenInfo(m){const s=getSeason(m);const c=document.getElementById("pollen-info");const ps=pollenCalendar[s];c.innerHTML=ps.map(p=>'<div class="pollen-item"><span class="pollen-icon">'+p.icon+'</span><div><div class="pollen-name">'+p.name+'</div><div class="pollen-season">'+p.desc+'</div></div></div>').join("")}
-function updateHighRiskCities(m){const s=getSeason(m);const c=document.getElementById("high-risk-cities");const content=document.getElementById("high-risk-content");const hr=Object.entries(cityData).filter(([,d])=>d.riskPattern[s]==="high"||d.riskPattern[s]==="very-high").map(([n])=>n);if(hr.length>0){c.style.display="block";content.textContent=hr.slice(0,8).join("、")+(hr.length>8?"":""})}else{c.style.display="none"}}
-function showCityDetail(n){const city=cityData[n];if(!city)return;const s=getSeason(new Date().getMonth()+1);document.getElementById("modal-city-name").textContent=n;const mr=document.getElementById("modal-risk");mr.textContent=getRiskText(city.riskPattern[s]);mr.className="modal-risk "+getRiskClass(city.riskPattern[s]);document.getElementById("modal-allergens-content").innerHTML=city.allergens[s].map(a=>'<span class="allergen-tag">'+a+"</span>").join("");document.getElementById("modal-tips").innerHTML="<h4>防护建议</h4><p>"+city.tips+"</p>";document.getElementById("city-modal").classList.add("active")}
-function closeModal(){document.getElementById("city-modal").classList.remove("active")}
-function updateMap(m){updateCityDots(m);updateCityList(m);updatePollenInfo(m);updateHighRiskCities(m)}
-document.getElementById("current-date").textContent="数据更新时间："+new Date().toLocaleDateString("zh-CN",{year:"numeric",month:"long",day:"numeric",weekday:"long"});initMonthControls();updateMap(new Date().getMonth()+1);document.getElementById("city-modal").onclick=function(e){if(e.target===this)closeModal()};
+
+    const monthNames=["1月","2月","3月","4月","5月","6月","7月","8月","9月","10月","11月","12月"];
+    const pollenCalendar={spring:[{icon:"🌳",name:"杨树/柳树花粉",desc:"华北地区3-4月高峰"},{icon:"🌲",name:"柏树花粉",desc:"3-5月全国分布"},{icon:"🌸",name:"法国梧桐",desc:"长三角4-5月飞絮"},{icon:"🍃",name:"桦树花粉",desc:"东北4-6月高峰"}],summer:[{icon:"🌾",name:"草本花粉",desc:"北方夏季主要过敏原"},{icon:"🌻",name:"向日葵花粉",desc:"西北7-8月"},{icon:"🍂",name:"蝉翼/蝉过敏",desc:"南方夏季特有"}],fall:[{icon:"🌿",name:"蒿草花粉",desc:"北方8-10月高峰"},{icon:"🍁",name:"葎草花粉",desc:"9-10月全国分布"},{icon:"🌾",name:"豚草花粉",desc:"北方城市秋季"},{icon:"🍄",name:"霉菌孢子",desc:"秋季潮湿环境高发"}],winter:[{icon:"🏠",name:"室内尘螨",desc:"冬季门窗紧闭高发"},{icon:"🍄",name:"霉菌",desc:"冬季室内暖气诱发"},{icon:"🐛",name:"宠物皮屑",desc:"冬季室内接触增加"}]};
+
+    // 初始化 Leaflet 地图
+    const map = L.map('map', {
+      center: [35.8617, 104.1954], // 中国中心
+      zoom: 4,
+      minZoom: 4,
+      maxZoom: 10
+    });
+
+    // 使用高德地图瓦片（免费，无需APIKey）
+    L.tileLayer('https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', {
+      subdomains: '1234',
+      attribution: '&copy; <a href="https://lbs.amap.com/">高德地图</a> | &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(map);
+
+    // 存储 markers 引用
+    let cityMarkers = {};
+
+    function getSeason(m){if(m>=3&&m<=5)return"spring";if(m>=6&&m<=8)return"summer";if(m>=9&&m<=11)return"fall";return"winter"}
+    function getRiskText(r){return{low:"低风险",medium:"中风险",high:"高风险","very-high":"极高风险"}[r]}
+    function getRiskClass(r){return{low:"risk-low",medium:"risk-medium",high:"risk-high","very-high":"risk-very-high"}[r]}
+    function getRiskColor(r){return{low:"#2ed573",medium:"#ffa502",high:"#ff4757","very-high":"#8b0000"}[r]}
+
+    function initMonthControls(){
+      const c=document.getElementById("month-controls");
+      const cm=new Date().getMonth()+1;
+      monthNames.forEach((n,i)=>{
+        const b=document.createElement("button");
+        b.className="month-btn"+(i+1===cm?" active":"");
+        b.textContent=n;
+        b.onclick=()=>{
+          document.querySelectorAll(".month-btn").forEach(x=>x.classList.remove("active"));
+          b.classList.add("active");
+          updateMap(i+1)
+        };
+        c.appendChild(b)
+      })
+    }
+
+    function createMarkerIcon(color) {
+      return L.divIcon({
+        className: 'custom-marker',
+        html: `<div style="
+          background:${color};
+          width:24px;
+          height:24px;
+          border-radius:50%;
+          border:3px solid #fff;
+          box-shadow:0 2px 8px rgba(0,0,0,0.4);
+        "></div>`,
+        iconSize: [24, 24],
+        iconAnchor: [12, 12]
+      });
+    }
+
+    function updateMap(m){
+      const s=getSeason(m);
+      
+      // 清除旧的 markers
+      Object.values(cityMarkers).forEach(marker => map.removeLayer(marker));
+      cityMarkers = {};
+      
+      // 添加新的 markers
+      Object.entries(cityData).forEach(([name, data]) => {
+        const coords = cityCoords[name];
+        if (!coords) return;
+        
+        const r = data.riskPattern[s];
+        const color = getRiskColor(r);
+        
+        const marker = L.marker(coords, {
+          icon: createMarkerIcon(color)
+        }).addTo(map);
+        
+        marker.bindPopup(`
+          <div style="text-align:center;min-width:150px">
+            <strong style="font-size:16px">${name}</strong><br>
+            <span style="
+              display:inline-block;
+              padding:4px 12px;
+              border-radius:12px;
+              background:${color};
+              color:#fff;
+              margin-top:6px;
+              font-weight:bold;
+            ">${getRiskText(r)}</span><br>
+            <small style="color:#666;margin-top:8px;display:block">
+              主要过敏原：${data.allergens[s].slice(0,2).join('、')}
+            </small>
+            <button onclick="showCityDetail('${name}')" style="
+              margin-top:10px;
+              padding:6px 16px;
+              background:#4a9eff;
+              color:#fff;
+              border:none;
+              border-radius:6px;
+              cursor:pointer;
+            ">查看详情</button>
+          </div>
+        `);
+        
+        cityMarkers[name] = marker;
+      });
+      
+      updateCityList(m);
+      updatePollenInfo(m);
+      updateHighRiskCities(m);
+    }
+
+    function updateCityList(m){
+      const s=getSeason(m);
+      const c=document.getElementById("city-list-content");
+      const t=document.getElementById("city-list-title");
+      t.textContent=monthNames[m-1]+"全国主要城市过敏风险";
+      const sorted=Object.entries(cityData).map(([n,d])=>({name:n,...d})).sort((a,b)=>{
+        const o={"very-high":0,high:1,medium:2,low:3};
+        return o[a.riskPattern[s]]-o[b.riskPattern[s]]
+      });
+      c.innerHTML=sorted.map(city=>`
+        <div class="city-item" onclick="showCityDetail('${city.name}')">
+          <div>
+            <div class="city-name">${city.name}</div>
+            <div class="city-allergens">${city.allergens[s].slice(0,2).join("、")}</div>
+          </div>
+          <span class="risk-badge ${getRiskClass(city.riskPattern[s])}">${getRiskText(city.riskPattern[s])}</span>
+        </div>
+      `).join("")
+    }
+
+    function updatePollenInfo(m){
+      const s=getSeason(m);
+      const c=document.getElementById("pollen-info");
+      const ps=pollenCalendar[s];
+      c.innerHTML=ps.map(p=>`
+        <div class="pollen-item">
+          <span class="pollen-icon">${p.icon}</span>
+          <div>
+            <div class="pollen-name">${p.name}</div>
+            <div class="pollen-season">${p.desc}</div>
+          </div>
+        </div>
+      `).join("")
+    }
+
+    function updateHighRiskCities(m){
+      const s=getSeason(m);
+      const c=document.getElementById("high-risk-cities");
+      const content=document.getElementById("high-risk-content");
+      const hr=Object.entries(cityData).filter(([,d])=>d.riskPattern[s]==="high"||d.riskPattern[s]==="very-high").map(([n])=>n);
+      if(hr.length>0){
+        c.style.display="block";
+        content.textContent=hr.slice(0,8).join("、")
+      }else{
+        c.style.display="none"
+      }
+    }
+
+    function showCityDetail(n){
+      const city=cityData[n];
+      if(!city)return;
+      const s=getSeason(new Date().getMonth()+1);
+      document.getElementById("modal-city-name").textContent=n;
+      const mr=document.getElementById("modal-risk");
+      mr.textContent=getRiskText(city.riskPattern[s]);
+      mr.className="modal-risk "+getRiskClass(city.riskPattern[s]);
+      document.getElementById("modal-allergens-content").innerHTML=city.allergens[s].map(a=>`<span class="allergen-tag">${a}</span>`).join("");
+      document.getElementById("modal-tips").innerHTML="<h4>防护建议</h4><p>"+city.tips+"</p>";
+      document.getElementById("city-modal").classList.add("active");
+      
+      // 地图定位到该城市
+      const coords = cityCoords[n];
+      if (coords) {
+        map.setView(coords, 8);
+      }
+    }
+
+    function closeModal(){
+      document.getElementById("city-modal").classList.remove("active");
+    }
+
+    // 初始化
+    document.getElementById("current-date").textContent="数据更新时间："+new Date().toLocaleDateString("zh-CN",{year:"numeric",month:"long",day:"numeric",weekday:"long"});
+    initMonthControls();
+    updateMap(new Date().getMonth()+1);
+    
+    // Modal 点击背景关闭
+    document.getElementById("city-modal").onclick=function(e){
+      if(e.target===this)closeModal()
+    };
   </script>
 </body>
 </html>
